@@ -83,24 +83,6 @@ run.bat
 ./run.sh
 ```
 
-#### 使用docker-compose运行项目
-
-```shell
-# 安装docker-compose 
-curl -L https://github.com/docker/compose/releases/download/1.26.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose 
-
-docker-compose --version
-docker-compose up -d # -d后台运行
-docker-compose stop # 停止启动
-docker-compose down # 清除容器
-
-dockerdata/config.py # 配置文件
-dockerdata/mysql/initdb/ # MySQL初始化数据在 
-rm -rf dockerdata/mysql/{log,data}/* # down掉容器后启动需要清除删除log,dat
-```
-
 ### 二次开发
 
 恭喜！现在您已经成功搭建并运行了 Pear Admin Flask ，是时候参与开发了：

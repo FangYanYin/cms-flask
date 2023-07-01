@@ -144,53 +144,6 @@ chmod +x run.sh
 ./run.sh
 ```
 
-
-
-
-#### 使用docker-compose运行项目
-
-```bash
-git clone https://gitee.com/pear-admin/pear-admin-flask
-
-#安装docker-compose 
-curl -L https://github.com/docker/compose/releases/download/1.26.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose 
-
-#运行如下命令，有输入版本，表示docker-compose 可以用了
-docker-compose --version 
-
-#在当前目录执行如下命令即可以运行app
-docker-compose -f dockercompose.yaml up
-
-#看到如下表示运行成功，由于pip下载慢，需要一些时间，请耐心等待；如果安装失败，重新执行上面的命令即可。
-
-#运行后在浏览器访问127.0.0.1：5000 
-
-#如果要停止容器运行，在当前文件夹执行如下命令：
-docker-compose -f dockercompose.yaml dwon
-
-
-```
-
-#### Pear Admin Flask 还有以下几个版本：
-
-```
-                    
-
-**[mini 分支版本](https://gitee.com/pear-admin/pear-admin-flask/tree/mini/)**
-
-flask 2.0.1 + flask-sqlalchemy + 权限验证 + flask-restful
-
-此版本主要是提供一个最个简的 pear admin flask 快速开发的模板，可以帮助用户快速搭建一个后台管理系统。
-因为一些历史问题，例如 flask-restful 不再继续更新等，此版本不会也再继续更新，而会将精力投入到 main 分支当中去。
-
-如果想使用这个分支进行开发，可以看 https://www.bilibili.com/video/BV1FF411b7bS 进行学习。
-
-**[main 分支版本](https://gitee.com/pear-admin/pear-admin-flask/tree/main/)**
-
-main 分支是对 mini 分支的后续，目前还在开发中。
-```
 #### 预览项目
 
 |                        |                        |
