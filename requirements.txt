@@ -10,4 +10,5 @@ PyMySQL
 psutil
 Flask-Mail
 Pillow
+validators
 cryptography
