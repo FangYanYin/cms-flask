@@ -59,7 +59,7 @@ def configs():
         # 默认的菜单主题 dark-theme 黑 / light-theme 白
         "defaultMenu": "dark-theme",
         # 是否允许用户切换主题，false 时关闭自定义主题面板
-        "allowCustom": True
+        "allowCustom": False
     }, colors=[{
         "id": "1",
         "color": "#2d8cf0"
@@ -127,7 +127,7 @@ def menu():
                 menu_dict[_dict['parent_id']].append(_dict)
         return jsonify(sorted(menu_dict.get(0), key=lambda item: item['sort']))
     else:
-        powers = Power.query.all()
+        powers = Power.query.filter(Power.enable == 1).all()
         power_schema = PowerOutSchema(many=True)  # 用已继承 ma.ModelSchema 类的自定制类生成序列化类
         power_dict = power_schema.dump(powers)  # 生成可序列化对象
         power_dict.sort(key=lambda x: (x['parent_id'], x['id']), reverse=True)

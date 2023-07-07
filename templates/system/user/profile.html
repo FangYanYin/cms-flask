@@ -65,7 +65,7 @@
         formData.append('fileToken', timeStamp)
         $.ajax({
           method: 'post',
-          url: '/admin/file/upload', //用于文件上传的服务器端请求地址
+          url: '/system/file/upload', //用于文件上传的服务器端请求地址
           data: formData,
           processData: false,
           contentType: false,
@@ -74,7 +74,7 @@
               // 修改 avatar 字段
               $.ajax({
                 method: 'put',
-                url: '/admin/user/updateAvatar',
+                url: '/system/user/updateAvatar',
                 data: JSON.stringify({ avatar: result.data }),
                 dataType: 'json',
                 contentType: 'application/json',

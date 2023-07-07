@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>课程分析</title>
+  {% include 'system/common/header.html' %}
+</head>
+
+<body class="pear-container">
+  {# 查询表单 #}
+  <div class="layui-card">
+    <div class="layui-card-body">
+      <form class="layui-form" action="" lay-filter="user-query-form">
+        <div class="layui-form-item">
+          <label class="layui-form-label">学年</label>
+          <div class="layui-input-inline">
+            <input type="text" name="realname" placeholder="" class="layui-input">
+          </div>
+          <label class="layui-form-label">学期</label>
+          <div class="layui-input-inline">
+            <input type="text" name="username" placeholder="" class="layui-input">
+          </div>
+          <label class="layui-form-label">课程名称</label>
+          <div class="layui-input-inline">
+            <input type="text" name="username" placeholder="" class="layui-input">
+          </div>
+          <label class="layui-form-label">任课老师</label>
+          <div class="layui-input-inline">
+            <input type="text" name="username" placeholder="" class="layui-input">
+          </div>
+          <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">
+            <i class="layui-icon layui-icon-search"></i>
+            查询
+          </button>
+          <button type="reset" class="pear-btn pear-btn-md">
+            <i class="layui-icon layui-icon-refresh"></i>
+            重置
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="layui-row layui-col-space10">
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-body">
+          <table id="dataTable" lay-filter="dataTable"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="layui-row layui-col-space10">
+    <div class="layui-col-md6">
+      <div class="layui-card">
+        <div class="layui-card-body">
+          <div id="echarts-records" style="min-height:400px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="layui-col-md6">
+      <div class="layui-card">
+        <div class="layui-card-body">
+          <div id="column2" style="min-height:400px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="layui-row layui-col-space10">
+    <div class="layui-col-md6">
+      <div class="layui-card">
+        <div class="layui-card-body">
+          <div id="column1" style="min-height:400px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- <script type="text/html" id="toolbar">
+    {% if authorize("system:file:add") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="add">
+            <i class="layui-icon layui-icon-add-1"></i>
+            新增
+        </button>
+    {% endif %}
+    {% if authorize("system:file:delete") %}
+        <button class="pear-btn pear-btn-sm" lay-event="batchRemove">
+            <i class="layui-icon layui-icon-delete"></i>
+            删除
+        </button>
+    {% endif %}
+</script> -->
+
+  <script type="text/html" id="user-bar">
+    {% if authorize("system:file:delete") %}
+        <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i
+                class="layui-icon layui-icon-delete"></i></button>
+    {% endif %}
+</script>
+  <script type="text/html" id="file-uploadTime">
+    {{ '  {{layui.util.toDateString(d.create_time,  "yyyy-MM-dd HH:mm:ss")}' |safe }}}
+</script>
+  {% include 'system/common/footer.html' %}
+  <script>
+    layui.use(['table', 'form', 'jquery', 'echarts'], function () {
+      let table = layui.table
+      let form = layui.form
+      let $ = layui.jquery
+      echarts = layui.echarts
+      var column1 = echarts.init(document.getElementById('column1'), null, {
+        width: 600,
+        height: 400
+      });
+      option = {
+        title: {
+          text: '出勤',
+          left: 'center',
+          top: 2,
+          fontSize: 20
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow',
+            color: '#fff',
+            fontSize: '26'
+          }
+        },
+        legend: {
+          top: '5%',
+          right: '10%',
+          data: ['高数', 'C语言'],
+          fontSize: 12,
+          color: '#808080',
+          icon: 'rect'
+        },
+        grid: {
+          top: 60,
+          left: 50,
+          bottom: 60,
+          right: 60
+        },
+        xAxis: [{
+          type: 'category',
+          axisTick: {
+            show: false
+          },
+          axisLine: {
+            show: false
+          },
+          axisLabel: {
+            color: '#4D4D4D',
+            fontSize: 14,
+            margin: 21,
+            fontWeight: 'bold'
+          },
+          data: ['第一周', '第二周', '第三周', '第四周'],
+
+        }],
+        yAxis: [{
+          name: '单位：人',
+          nameTextStyle: {
+            color: '#808080',
+            fontSize: 12,
+            padding: [0, 0, 0, -5]
+          },
+          max: function (value) {
+            if (value.max < 5) {
+              return 5
+            } else {
+              return value.max
+            }
+          },
+          type: 'value',
+          axisLine: {
+            show: false
+          },
+          axisLabel: {
+            color: '#808080',
+            fontSize: 12,
+            margin: 5
+          },
+          splitLine: {
+            show: false
+          },
+          axisTick: {
+            show: false
+          }
+        }],
+        series: [
+          {
+            name: '高数',
+            type: 'bar',
+            label: {
+              show: true,
+              position: 'top',
+              fontSize: 14,
+              color: '#3DC3F0',
+              fontWeight: 'bold'
+            },
+            barMaxWidth: 60,
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#3DC3F0' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#CCF2FF' // 100% 处的颜色
+              }]
+            },
+            data: [60, 110, 180, 100]
+          },
+          {
+            name: 'C语言',
+            type: 'bar',
+            label: {
+              show: true,
+              position: 'top',
+              fontSize: 14,
+              color: '#3D8BF0',
+              fontWeight: 'bold'
+            },
+            barMaxWidth: 60,
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: '#3D8BF0' // 0% 处的颜色
+              }, {
+                offset: 1, color: '#CCE2FF' // 100% 处的颜色
+              }]
+            },
+            data: [90, 130, 170, 130]
+          }
+        ]
+      };
+
+      column1.setOption(option);
+
+      window.onresize = function () {
+        column1.resize();
+      }
+
+      // column2
+      var column2 = echarts.init(document.getElementById('column2'));
+
+      var data = [1000, 600, 500, 300];
+      option = {
+        backgroundColor: '#ffffff',
+        title: {
+          text: '及格率',
+          left: 'center',
+          top: 2,
+          fontSize: 20
+        },
+        color: ['#fed46b', '#2194ff'],
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { // 坐标轴指示器，坐标轴触发有效
+            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '10%',
+          containLabel: true
+        },
+        legend: {
+          left: 'center',
+          bottom: '2%',
+          data: ['2017-2018', '2019-2020'],
+          show: true
+        },
+        xAxis: [{
+          type: 'category',
+          data: ['09-22', '09-22', '09-22', '09-22', '09-22', '09-22', '09-22'],
+          axisTick: {
+            alignWithLabel: true
+          }
+        }],
+        yAxis: [{
+          type: 'value'
+        }],
+        barMaxWidth: '30',
+        label: {
+          show: true,
+          position: 'top',
+          formatter: function (params) {
+            return params.value + '%'
+          }
+        },
+        series: [
+          {
+            name: '2017-2018',
+            type: 'bar',
+            data: [90, 52, 90, 80, 90, 70, 90]
+          },
+          {
+            name: '2019-2020',
+            type: 'bar',
+            data: [10, 52, 90, 70, 90, 70, 90]
+          },
+        ]
+      };
+      column2.setOption(option);
+      window.onresize = function () {
+        column2.resize();
+      }
+
+      // line
+      var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden')
+      var option = {
+        title: {
+          text: '总分趋势',
+          left: 'center',
+          top: 2,
+          fontSize: 20
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        xAxis: [{
+          type: 'category',
+          data: ['2019-01', '2019-02', '2019-03', '2019-04', '2019-05', '2019-06'],
+          axisLine: {
+            lineStyle: {
+              color: '#999'
+            }
+          }
+        }],
+        yAxis: [{
+          type: 'value',
+          splitNumber: 4,
+          splitLine: {
+            lineStyle: {
+              type: 'dashed',
+              color: '#DDD'
+            }
+          },
+          axisLine: {
+            show: false,
+            lineStyle: {
+              color: '#333'
+            },
+          },
+          nameTextStyle: {
+            color: '#999'
+          },
+          splitArea: {
+            show: false
+          }
+        }],
+        series: [{
+          name: '课时',
+          type: 'line',
+          data: [23, 60, 20, 36, 23, 85],
+          lineStyle: {
+            normal: {
+              width: 8,
+              color: {
+                type: 'linear',
+                colorStops: [{
+                  offset: 0,
+                  color: '#A9F387' // 0% 处的颜色
+                }, {
+                  offset: 1,
+                  color: '#48D8BF' // 100% 处的颜色
+                }],
+                globalCoord: false // 缺省为 false
+              },
+              shadowColor: 'rgba(72,216,191, 0.3)',
+              shadowBlur: 10,
+              shadowOffsetY: 20
+            }
+          },
+          itemStyle: {
+            normal: {
+              color: '#fff',
+              borderWidth: 10,
+              /*shadowColor: 'rgba(72,216,191, 0.3)',
+              shadowBlur: 100,*/
+              borderColor: '#A9F387'
+            }
+          },
+          smooth: true
+        }]
+      }
+      echartsRecords.setOption(option)
+
+      window.onresize = function () {
+        echartsRecords.resize()
+      }
+
+      let cols = [
+        [
+          {
+            type: 'checkbox'
+          },
+          {
+            field: 'id',
+            title: '序号',
+            sort: true,
+            align: 'center',
+            unresize: true,
+            width: 80
+          },
+          {
+            field: 'name',
+            title: '学期',
+            unresize: true,
+            align: 'center'
+          },
+          {
+            field: 'href',
+            title: '学号',
+            unresize: true,
+            align: 'center',
+            templet: function (d) {
+              return '<img class="photo" style="max-width: 100%;\n' +
+                '  height: 100%;\n' +
+                '  cursor: pointer;" lay-event="photo" src=" ' + d.href + '"></i>'
+            }
+          },
+          {
+            field: 'mime',
+            title: '姓名',
+            unresize: true,
+            align: 'center'
+          },
+          {
+            field: 'size',
+            title: '课程名称',
+            unresize: true,
+            align: 'center'
+          },
+          {
+            field: 'create_time',
+            title: '考试时间',
+            templet: '#file-uploadTime',
+            unresize: true,
+            align: 'center'
+          }
+        ]
+      ]
+
+      table.render({
+        elem: '#dataTable',
+        url: 'table',
+        page: true,
+        limit: 5,
+        limits: [5, 10, 15],
+        cols: cols,
+        skin: 'line',
+      })
+
+      table.on('tool(dataTable)', function (obj) {
+        if (obj.event === 'remove') {
+          window.remove(obj)
+        } else if (obj.event === 'photo') {
+          window.photo(obj)
+        }
+      })
+
+      table.on('toolbar(dataTable)', function (obj) {
+        if (obj.event === 'add') {
+          window.add()
+        } else if (obj.event === 'refresh') {
+          window.refresh()
+        } else if (obj.event === 'batchRemove') {
+          window.batchRemove(obj)
+        }
+      })
+
+      //弹出窗设置 自己设置弹出百分比
+      function screen() {
+        if (typeof width !== 'number' || width === 0) {
+          width = $(window).width() * 0.8
+        }
+        if (typeof height !== 'number' || height === 0) {
+          height = $(window).height() - 20
+        }
+        return [width + 'px', height + 'px']
+      }
+
+      window.add = function () {
+        layer.open({
+          type: 2,
+          maxmin: true,
+          title: '新增图片',
+          shade: 0.1,
+          area: screen(),
+          content: 'upload'
+        })
+      }
+
+      window.remove = function (obj) {
+        layer.confirm('确定要删除该图片', {
+          icon: 3,
+          title: '提示'
+        }, function (index) {
+          layer.close(index)
+          let loading = layer.load()
+          $.ajax({
+            url: 'delete',
+            data: { id: obj.data['id'] },
+            dataType: 'json',
+            type: 'POST',
+            success: function (res) {
+              layer.close(loading)
+              if (res.success) {
+                layer.msg(res.msg, {
+                  icon: 1,
+                  time: 1000
+                }, function () {
+                  obj.del()
+                })
+              } else {
+                layer.msg(res.msg, {
+                  icon: 2,
+                  time: 1000
+                })
+              }
+            }
+          })
+        })
+      }
+
+      window.batchRemove = function (obj) {
+        let data = table.checkStatus(obj.config.id).data
+        if (data.length === 0) {
+          layer.msg('未选中数据', {
+            icon: 3,
+            time: 1000
+          })
+          return false
+        }
+        var ids = []
+        var hasCheck = table.checkStatus('dataTable')
+        var hasCheckData = hasCheck.data
+        if (hasCheckData.length > 0) {
+          $.each(hasCheckData, function (index, element) {
+            ids.push(element.id)
+          })
+        }
+        layer.confirm('确定要删除这些图片', {
+          icon: 3,
+          title: '提示'
+        }, function (index) {
+          layer.close(index)
+          let loading = layer.load()
+          $.ajax({
+            url: "{{ url_for('system.adminFile.batch_remove') }}",
+            data: { ids: ids },
+            dataType: 'json',
+            type: 'POST',
+            success: function (res) {
+              layer.close(loading)
+              if (res.success) {
+                layer.msg(res.msg, {
+                  icon: 1,
+                  time: 1000
+                }, function () {
+                  table.reload('dataTable')
+                })
+              } else {
+                layer.msg(res.msg, {
+                  icon: 2,
+                  time: 1000
+                })
+              }
+            }
+          })
+        })
+      }
+
+      window.refresh = function () {
+        table.reload('dataTable')
+      }
+      // 查看大图
+      window.photo = function (obj) {
+        if (!obj.data.href || obj.data.href === '') {
+          layer.msg('图片地址错误！')
+          return
+        }
+        var auto_img = {}
+        var img = new Image()
+        img.src = obj.data.href
+        img.onload = function () {
+          var max_height = $(window).height() - 100
+          var max_width = $(window).width()
+          var rate1 = max_height / img.height
+          var rate2 = max_width / img.width
+          var rate3 = 1
+          var rate = Math.min(rate1, rate2, rate3)
+          auto_img.height = img.height * rate
+          auto_img.width = img.width * rate
+          layer.open({
+            type: 1,
+            title: false,
+            area: ['auto'],
+            skin: 'layui-layer-nobg', //没有背景色
+            shadeClose: true,
+            content: '<img src=\'' + obj.data['href'] + '\' width=\'' + auto_img.width + 'px\' height=\'' + auto_img.height + 'px\'>'
+          })
+        }
+      }
+
+    })
+  </script>

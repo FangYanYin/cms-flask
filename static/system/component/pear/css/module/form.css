@@ -31,6 +31,10 @@ textarea::-webkit-input-placeholder {
     border: #F56C6C 1px solid!important;
 }
 
+.layui-form-label {
+    width: 60px;
+}
+
 .layui-input,
 .layui-select,
 .layui-textarea {

@@ -115,7 +115,7 @@ body,
 }
 
 .pear-admin .layui-logo .logo {
-	display: none;
+	display: inline-block;
 }
 
 .pear-admin .layui-side {

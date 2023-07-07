@@ -5,7 +5,7 @@ from urllib.parse import quote_plus as urlquote
 class BaseConfig:
     SUPERADMIN = 'admin'
 
-    SYSTEM_NAME = 'Pear Admin'
+    SYSTEM_NAME = '学情分析'
     # 主题面板的链接列表配置
     SYSTEM_PANEL_LINKS = [
         {
