@@ -31,7 +31,7 @@
 
 Pear Admin Flask 基于 Flask 的后台管理系统，拥抱应用广泛的python语言，通过使用本系统，即可快速构建你的功能业务
 项目旨在为 python 开发者提供一个后台管理系统的模板，可以快速构建信息管理系统。
-项目使用flask-sqlalchemy + 权限验证 + Flask-APScheduler 定时任务 + marshmallow 序列化与数据验证
+项目使用flask-sqlalchemy + 权限验证 + Flask-APScheduler 定时任务 + marshmallow 序列化与数据验证。
 
 #### 内置功能
 
