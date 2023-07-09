@@ -44,31 +44,6 @@
       </div>
     </div>
   </div>
-<div class="layui-row layui-col-space10">
-  <div class="layui-col-md6">
-    <div class="layui-card">
-      <div class="layui-card-body">
-        <div id="echarts-records" style="min-height:400px;"></div>
-      </div>
-    </div>
-  </div>
-  <div class="layui-col-md6">
-    <div class="layui-card">
-      <div class="layui-card-body">
-        <div id="column2" style="min-height:400px;"></div>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="layui-row layui-col-space10">
-  <div class="layui-col-md6">
-    <div class="layui-card">
-      <div class="layui-card-body">
-        <div id="column1" style="min-height:400px;"></div>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
 {% include 'system/common/footer.html' %}
 <script>
@@ -211,8 +186,6 @@
             page: true,
             cols: cols,
             skin: 'line',
-            limit: 5,
-            limits: [5, 10, 15],
             toolbar: '#role-toolbar',
             defaultToolbar: [{
                 layEvent: 'refresh',

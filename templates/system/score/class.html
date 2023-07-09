@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  {% include 'system/common/header.html' %}</head>
+
+<body class="pear-container">
+  <div class="layui-card">
+    <div class="layui-card-body">
+      <form class="layui-form" action="" lay-filter="score-query-form">
+        <div class="layui-form-item">
+          <label class="layui-form-label">班级</label>
+          <div class="layui-input-inline">
+            <input type="text" name="banji" placeholder="" class="layui-input">
+          </div>
+          <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="score-query">
+            <i class="layui-icon layui-icon-search"></i>
+            查询
+          </button>
+          <button type="reset" class="pear-btn pear-btn-md">
+            <i class="layui-icon layui-icon-refresh"></i>
+            重置
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="layui-row layui-col-space10">
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-body">
+          <table id="role-table" lay-filter="role-table"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="layui-row layui-col-space10">
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-body">
+          <div id="column2" style="min-height:400px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+{% include 'system/common/footer.html' %}
+<script>
+  layui.use(['table', 'form', 'jquery', 'popup', 'echarts'], function () {
+    let table = layui.table
+    let form = layui.form
+    let $ = layui.jquery
+    let popup = layui.popup
+
+    let MODULE_PATH = '/system/score/'
+
+    let cols = [
+      [
+        {
+          type: 'radio'
+        },
+        {
+          field: 'banji',
+          title: '班级',
+          unresize: true,
+          align: 'center'
+        },
+        {
+          field: 'major_name',
+          title: '专业名称',
+          unresize: true,
+          align: 'center'
+        },
+        {
+          field: 'grade',
+          title: '年级',
+          unresize: true,
+          align: 'center'
+        },
+      ]
+    ]
+
+    table.render({
+      elem: '#role-table',
+      url: MODULE_PATH + 'class_data',
+      page: true,
+      cols: cols,
+      skin: 'line',
+      limit: 5,
+      limits: [5, 10, 15],
+      // 默认选择第一行数据
+      done: function (res, curr, count) {
+        $(".layui-table-view[lay-id='role-table'] .layui-table-body tr[data-index = '0' ] .layui-form-radio").click();
+      }
+    })
+    // 单选框事件
+    table.on('radio(role-table)', function (obj) {
+      console.log(obj.data); // 选中行的相关数据
+      $.ajax({
+        url: MODULE_PATH + 'class_chart?banji=' + obj.data.banji,
+        type: 'get',
+        success: function (result) {
+          console.log(result)
+          echarts = layui.echarts
+          var column2 = echarts.init(document.getElementById('column2'));
+          var data = [1000, 600, 500, 300];
+          option = {
+            backgroundColor: '#ffffff',
+            title: {
+              text: '及格率',
+              left: 'center',
+              top: 2,
+              fontSize: 20
+            },
+            color: ['#2194ff'],
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: { // 坐标轴指示器，坐标轴触发有效
+                type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+              }
+            },
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '10%',
+              containLabel: true
+            },
+            xAxis: [{
+              type: 'category',
+              data: result.data.category,
+              axisTick: {
+                alignWithLabel: true
+              }
+            }],
+            yAxis: [{
+              type: 'value'
+            }],
+            barMaxWidth: '30',
+            label: {
+              show: true,
+              position: 'top',
+              formatter: function (params) {
+                return params.value + '%'
+              }
+            },
+            series: [
+              {
+                type: 'bar',
+                data: result.data.series
+              },
+            ]
+          };
+          column2.setOption(option);
+          window.onresize = function () {
+            column2.resize();
+          }
+
+        }
+      })
+    });
+
+    form.on('submit(score-query)', function (data) {
+      table.reload('role-table', { where: data.field })
+      return false
+    })
+
+    window.refresh = function () {
+      table.reload('role-table')
+    }
+
+  })
+</script>
+
+</html>

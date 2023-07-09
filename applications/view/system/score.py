@@ -1,13 +1,13 @@
-import os
+import os,json
 from flask import Blueprint, request, render_template, jsonify, current_app
 
 from applications.common.utils.http import fail_api, success_api, table_api
 from applications.common.utils.rights import authorize
 from applications.extensions import db
 from applications.models import Score
-from sqlalchemy import desc
+from sqlalchemy import desc,distinct
 from applications.schemas import ScoreOutSchema
-from applications.common.curd import model_to_dicts
+from applications.common.curd import model_to_dicts, auto_model_jsonify
 from applications.common.utils.validate import str_escape
 
 bp = Blueprint('adminScore', __name__, url_prefix='/score')
@@ -45,6 +45,58 @@ def table():
     count = score.total
     return table_api(data= model_to_dicts(schema=ScoreOutSchema, data=score.items), count=count)
 
+#  班级分析
+@bp.get('/class')
+@authorize("system:score:class")
+def banji():
+    return render_template('system/score/class.html')
+
+#  班级数据
+@bp.get('/class_data')
+@authorize("system:score:class")
+def banji_data():
+    page = request.args.get('page', type=int)
+    limit = request.args.get('limit', type=int)
+    banji = str_escape(request.args.get('banji', type=str))
+    filters = []
+    if banji:
+        filters.append(Score.banji.contains(banji))
+    # 指定字段
+    score = Score.query.distinct().with_entities(Score.banji, Score.major_name, Score.grade).filter(*filters).paginate(page=page, per_page=limit, error_out=False)
+    count = score.total
+    return table_api(data= model_to_dicts(schema=ScoreOutSchema, data=score.items), count=count)
+
+#  班级图表数据
+@bp.get('/class_chart')
+@authorize("system:score:class")
+def banji_chart():
+    banji = str_escape(request.args.get('banji', type=str))
+    filters = []
+    if banji:
+        filters.append(Score.banji.contains(banji))
+    print(filters)
+    categoryData = []
+    seriesData = []
+    graphData = []
+    courseNames = Score.query.distinct().with_entities(Score.course_name).filter(*filters).logic_all()
+    count = Score.query.distinct().with_entities(Score.course_name).filter(*filters).count()
+    for courseName in courseNames:
+        filters.append(Score.course_name.contains(courseName.course_name))
+        # 保留4位小数 | 为了防止减了之后很多小数，外层round
+        passRate = round(1 - (Score.query.filter(*filters).filter(Score.score < 59).count() / Score.query.filter(*filters).count()), 4)
+        categoryData.append(courseName.course_name) 
+        seriesData.append(round(passRate*100, 2)) 
+        # if passRate != 1:
+        #     categoryData.append(courseName.course_name) 
+        #     seriesData.append(passRate*100) 
+        filters.pop()
+    res = {
+        'msg': '',
+        'count': count,
+        'code': 0,
+        'data':  {'category': categoryData, 'series': seriesData},
+    }
+    return jsonify(res)
 
 #   上传
 @bp.get('/upload')

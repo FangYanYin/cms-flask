@@ -54,7 +54,7 @@ class Query(BaseQuery):
         return self.update({"delete_at": datetime.datetime.now()})
 
     def logic_all(self):
-        return self.filter_by(delete_at=None).all()
+        return self.filter_by(delete_time=None).all()
 
     def all_json(self, schema: Marshmallow().Schema):
         return schema(many=True).dump(self.all())
