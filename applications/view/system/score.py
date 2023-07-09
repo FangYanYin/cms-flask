@@ -97,19 +97,26 @@ def banji_chart():
         else:
             e += 1
         filters.pop()
+    # 排序
+    categorySeries = zip(categoryData,seriesData)
+    sortedCategorySeries = sorted(categorySeries,key=lambda x:x[1])
+    result = zip(*sortedCategorySeries)
+    sortedCategoryData, sortedSeriesData = [list(x) for x in result]
+
     res = {
         'msg': '',
         'count': count,
         'code': 0,
         'data':  {
-            'category': categoryData,
-              'series': seriesData,
+            # 取前10个
+            'category': sortedCategoryData[:10],
+              'series': sortedSeriesData[:10],
               'pie' : [
-                  { 'value': a, 'name': '优秀(100%)' },
-                  { 'value': b, 'name': '掌握(90%~99%)' },
-                  { 'value': c, 'name': '合格(80%~90%)' },
-                  { 'value': d, 'name': '不合格(<80%)' },
-                  { 'value': e, 'name': '⚠️(<20%)' }
+                  { 'value': round(a / (a+b+c+d+e), 2), 'name': '优秀(100%)' },
+                  { 'value': round(b / (a+b+c+d+e), 2), 'name': '掌握(90%~99%)' },
+                  { 'value': round(c / (a+b+c+d+e), 2), 'name': '合格(80%~90%)' },
+                  { 'value': round(d / (a+b+c+d+e), 2), 'name': '不合格(<80%)' },
+                  { 'value': round(e / (a+b+c+d+e), 2), 'name': '⚠️(<20%)' }
                 ]
               },
     }

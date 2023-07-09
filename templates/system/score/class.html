@@ -42,12 +42,10 @@
         </div>
       </div>
     </div>
-  </div>
-  <div class="layui-row layui-col-space10">
-    <div class="layui-col-md12">
+    <div class="layui-col-md6">
       <div class="layui-card">
         <div class="layui-card-body">
-          <div id="column2" style="min-height:400px;"></div>
+          <div id="column1" style="min-height:400px;"></div>
         </div>
       </div>
     </div>
@@ -111,12 +109,47 @@
         success: function (result) {
           console.log(result)
           echarts = layui.echarts
-          var column2 = echarts.init(document.getElementById('column2'));
+          var column1 = echarts.init(document.getElementById('column1'));
           var pie = echarts.init(document.getElementById('pie'));
-          option = {
+          // pie chart
+          optionPie = {
+            title: {
+              text: '及格率区间分布',
+              left: 'center'
+            },
+            tooltip: {
+              trigger: 'item'
+            },
+            legend: {
+              orient: 'vertical',
+              left: 'left'
+            },
+
+            series: [
+              {
+                name: 'PassRatio',
+                type: 'pie',
+                radius: '50%',
+                data: result.data.pie,
+                emphasis: {
+                  itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                  }
+                }
+              }
+            ]
+          };
+          pie.setOption(optionPie);
+          window.onresize = function () {
+            pie.resize();
+          }
+
+          optionColumn1 = {
             backgroundColor: '#ffffff',
             title: {
-              text: '及格率',
+              text: '最低及格率课程',
               left: 'center',
               top: 2,
               fontSize: 20
@@ -159,43 +192,9 @@
               },
             ]
           };
-          column2.setOption(option);
+          column1.setOption(optionColumn1);
           window.onresize = function () {
-            column2.resize();
-          }
-          // pie chart
-          optionPie = {
-            title: {
-              text: '及格率区间分布',
-              left: 'center'
-            },
-            tooltip: {
-              trigger: 'item'
-            },
-            legend: {
-              orient: 'vertical',
-              left: 'left'
-            },
-
-            series: [
-              {
-                name: 'PassRatio',
-                type: 'pie',
-                radius: '50%',
-                data: result.data.pie,
-                emphasis: {
-                  itemStyle: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)'
-                  }
-                }
-              }
-            ]
-          };
-          pie.setOption(optionPie);
-          window.onresize = function () {
-            pie.resize();
+            column1.resize();
           }
         }
       })
