@@ -5,7 +5,7 @@ from applications.common.utils.http import fail_api, success_api, table_api
 from applications.common.utils.rights import authorize
 from applications.extensions import db
 from applications.models import Score
-from sqlalchemy import desc,distinct
+from sqlalchemy import desc
 from applications.schemas import ScoreOutSchema
 from applications.common.curd import model_to_dicts, auto_model_jsonify
 from applications.common.utils.validate import str_escape
@@ -77,26 +77,74 @@ def banji_chart():
     print(filters)
     categoryData = []
     seriesData = []
-    graphData = []
     courseNames = Score.query.distinct().with_entities(Score.course_name).filter(*filters).logic_all()
     count = Score.query.distinct().with_entities(Score.course_name).filter(*filters).count()
+    a = b = c = d = e = 0;
     for courseName in courseNames:
         filters.append(Score.course_name.contains(courseName.course_name))
         # 保留4位小数 | 为了防止减了之后很多小数，外层round
         passRate = round(1 - (Score.query.filter(*filters).filter(Score.score < 59).count() / Score.query.filter(*filters).count()), 4)
         categoryData.append(courseName.course_name) 
         seriesData.append(round(passRate*100, 2)) 
-        # if passRate != 1:
-        #     categoryData.append(courseName.course_name) 
-        #     seriesData.append(passRate*100) 
+        if passRate == 1:
+            a += 1
+        elif passRate > 0.9:
+            b += 1
+        elif passRate > 0.8:
+            c += 1
+        elif passRate > 0.2:
+            d += 1
+        else:
+            e += 1
         filters.pop()
     res = {
         'msg': '',
         'count': count,
         'code': 0,
-        'data':  {'category': categoryData, 'series': seriesData},
+        'data':  {
+            'category': categoryData,
+              'series': seriesData,
+              'pie' : [
+                  { 'value': a, 'name': '优秀(100%)' },
+                  { 'value': b, 'name': '掌握(90%~99%)' },
+                  { 'value': c, 'name': '合格(80%~90%)' },
+                  { 'value': d, 'name': '不合格(<80%)' },
+                  { 'value': e, 'name': '⚠️(<20%)' }
+                ]
+              },
     }
     return jsonify(res)
+
+#  单科分析
+@bp.get('/single')
+@authorize("system:score:single")
+def single():
+    return render_template('system/score/single.html')
+
+#  单科数据
+@bp.get('/single_data')
+@authorize("system:score:single")
+def single_data():
+    page = request.args.get('page', type=int)
+    limit = request.args.get('limit', type=int)
+    school_year = str_escape(request.args.get('year', type=str))
+    semester = str_escape(request.args.get('semester', type=str))
+    course_name = str_escape(request.args.get('course', type=str))
+    teacher_name = str_escape(request.args.get('teacher', type=str))
+    filters = []
+    if school_year:
+        filters.append(Score.school_year.contains(school_year))
+    if semester:
+        filters.append(Score.semester.contains(semester))
+    if course_name:
+        filters.append(Score.course_name.contains(course_name))
+    if teacher_name:
+        filters.append(Score.teacher_name.contains(teacher_name))
+    # orm查询
+    # 使用分页获取data需要.items
+    score = Score.query.filter(*filters).order_by(desc(Score.id)).paginate(page=page, per_page=limit, error_out=False)
+    count = score.total
+    return table_api(data= model_to_dicts(schema=ScoreOutSchema, data=score.items), count=count)
 
 #   上传
 @bp.get('/upload')
