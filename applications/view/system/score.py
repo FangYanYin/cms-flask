@@ -111,6 +111,7 @@ def banji_chart():
             # 取前10个
             'category': sortedCategoryData[:10],
               'series': sortedSeriesData[:10],
+              'categories': a+b+c+d+e,
               'pie' : [
                   { 'value': round(a / (a+b+c+d+e), 2), 'name': '优秀(100%)' },
                   { 'value': round(b / (a+b+c+d+e), 2), 'name': '掌握(90%~99%)' },
