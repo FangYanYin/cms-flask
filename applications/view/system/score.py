@@ -5,7 +5,7 @@ from applications.common.utils.http import fail_api, success_api, table_api
 from applications.common.utils.rights import authorize
 from applications.extensions import db
 from applications.models import Score
-from sqlalchemy import desc
+from sqlalchemy import desc,asc
 from applications.schemas import ScoreOutSchema
 from applications.common.curd import model_to_dicts, auto_model_jsonify
 from applications.common.utils.validate import str_escape
@@ -158,9 +158,13 @@ def single_chart():
     if course:
         filters.append(Score.course_name.contains(course))
     data = Score.query.filter(*filters).logic_all()
+    highestScore = Score.query.filter(*filters).order_by(desc(Score.score)).first()
+    lowestScore = Score.query.filter(*filters).order_by(asc(Score.score)).first()
     count = Score.query.filter(*filters).count()
-    a = b = c = d = e = 0;
+    a = b = c = d = e = sumScore = 0;
+    
     for item in data:
+        sumScore += int(item.score)
         if int(item.score) > 89:
             a += 1
         elif int(item.score) > 79:
@@ -177,6 +181,10 @@ def single_chart():
         'count': count,
         'code': 0,
         'data':  {
+            'highest_score': highestScore.score,
+            'lowest_score': lowestScore.score,
+            'average_score': round(sumScore / count, 2),
+            'nopass_ratio': round(e / (a+b+c+d+e), 2),
             'category': ['⚠️(<60)', '合格(60~69)', '一般(70~79)', '掌握(80~89)', '优秀(90~100)'],
               'series': [e, d, c, b, a],
               'categories': a+b+c+d+e,

@@ -54,6 +54,14 @@
       </div>
     </div>
   </div>
+  <div class="layui-panel">
+    <div style="padding: 32px;">
+      <b>最高分：</b><span class="layui-badge layui-bg-green" id="highest_score">蓝</span>
+      <b></b>最低分：</b><span class="layui-badge" id="lowest_score">赤</span>
+      <b></b>平均分：</b><span class="layui-badge layui-bg-orange" id="average_score">橙</span>
+      <b></b>挂科率：</b><span class="layui-badge layui-bg-blue" id="nopass_ratio">绿</span>
+    </div>
+  </div>
   <div class="layui-row layui-col-space10">
     <div class="layui-col-md12">
       <div class="layui-card">
@@ -130,6 +138,10 @@
           echarts = layui.echarts
           var column1 = echarts.init(document.getElementById('column1'));
           var pie = echarts.init(document.getElementById('pie'));
+          $("#highest_score").html(result.data.highest_score);
+          $("#lowest_score").html(result.data.lowest_score);
+          $("#average_score").html(result.data.average_score);
+          $("#nopass_ratio").html(result.data.nopass_ratio + '%');
           // pie chart
           optionPie = {
             title: {
@@ -348,7 +360,6 @@
             cols: colsStu,
             skin: 'line',
           })
-
         }
       })
     });
