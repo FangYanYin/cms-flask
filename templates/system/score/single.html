@@ -13,6 +13,10 @@
           <div class="layui-input-inline">
             <input type="text" name="banji" placeholder="" class="layui-input">
           </div>
+          <label class="layui-form-label">课程名称</label>
+          <div class="layui-input-inline">
+            <input type="text" name="course" placeholder="" class="layui-input">
+          </div>
           <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="score-query">
             <i class="layui-icon layui-icon-search"></i>
             查询
@@ -50,6 +54,15 @@
       </div>
     </div>
   </div>
+  <div class="layui-row layui-col-space10">
+    <div class="layui-col-md12">
+      <div class="layui-card">
+        <div class="layui-card-body">
+          <table id="student-table" lay-filter="student-table"></table>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 {% include 'system/common/footer.html' %}
 <script>
@@ -73,6 +86,12 @@
           align: 'center'
         },
         {
+          field: 'course_name',
+          title: '课程名称',
+          unresize: true,
+          align: 'center'
+        },
+        {
           field: 'major_name',
           title: '专业名称',
           unresize: true,
@@ -89,7 +108,7 @@
 
     table.render({
       elem: '#role-table',
-      url: MODULE_PATH + 'class_data',
+      url: MODULE_PATH + 'single_data',
       page: true,
       cols: cols,
       skin: 'line',
@@ -104,7 +123,7 @@
     table.on('radio(role-table)', function (obj) {
       console.log(obj.data); // 选中行的相关数据
       $.ajax({
-        url: MODULE_PATH + 'class_chart?banji=' + obj.data.banji,
+        url: MODULE_PATH + 'single_chart?banji=' + obj.data.banji + '&course=' + obj.data.course_name,
         type: 'get',
         success: function (result) {
           console.log(result)
@@ -114,8 +133,8 @@
           // pie chart
           optionPie = {
             title: {
-              text: '及格率区间分布',
-              subtext: '课程数：' + result.data.categories,
+              text: '考试成绩区间分布图',
+              subtext: '总人数：' + result.data.categories,
               left: 'center'
             },
             tooltip: {
@@ -150,12 +169,11 @@
           optionColumn1 = {
             backgroundColor: '#ffffff',
             title: {
-              text: '最低及格率课程',
+              text: '考试成绩统计直方图',
               left: 'center',
               top: 2,
               fontSize: 20
             },
-            color: ['#ff7070'],
             tooltip: {
               trigger: 'axis',
               axisPointer: { // 坐标轴指示器，坐标轴触发有效
@@ -181,6 +199,7 @@
 
             }],
             yAxis: [{
+              // name: '人数',
               type: 'value'
             }],
             barMaxWidth: '30',
@@ -188,9 +207,10 @@
               show: true,
               position: 'top',
               formatter: function (params) {
-                return params.value + '%'
+                return params.value + '人'
               }
             },
+
             series: [
               {
                 type: 'bar',
@@ -202,6 +222,133 @@
           window.onresize = function () {
             column1.resize();
           }
+
+          let colsStu = [
+            [
+              {
+                field: 'banji',
+                title: '班级',
+                unresize: true,
+                fixed: 'left',
+                align: 'center',
+                width: 150
+              },
+              {
+                field: 'course_name',
+                title: '课程名称',
+                unresize: true,
+                fixed: 'left',
+                align: 'center',
+                width: 150
+              },
+              {
+                field: 'school_year',
+                title: '学年',
+                unresize: true,
+                align: 'center',
+                width: 150
+              },
+              {
+                field: 'semester',
+                title: '学期',
+                unresize: true,
+                align: 'center',
+                width: 100
+              },
+              {
+                field: 'student_no',
+                title: '学号',
+                unresize: true,
+                align: 'center',
+                width: 150
+              },
+              {
+                field: 'student_name',
+                title: '姓名',
+                unresize: true,
+                align: 'center',
+                width: 150
+              },
+              {
+                field: 'sex',
+                title: '性别',
+                unresize: true,
+                align: 'center',
+                width: 50
+              },
+              {
+                field: 'opening_college',
+                title: '开课学院',
+                unresize: true,
+                align: 'center',
+                width: 250
+              },
+              {
+                field: 'course_nature',
+                title: '课程性质',
+                unresize: true,
+                align: 'center',
+                width: 150
+              },
+              {
+                field: 'credit',
+                title: '学分',
+                unresize: true,
+                align: 'center'
+              },
+              {
+                field: 'score',
+                title: '成绩',
+                unresize: true,
+                align: 'center',
+                width: 50
+              },
+              {
+                field: 'course_type',
+                title: '课程类别',
+                unresize: true,
+                align: 'center',
+                width: 150
+              },
+              {
+                field: 'teacher_name',
+                title: '任课老师',
+                unresize: true,
+                align: 'center',
+                width: 150
+              },
+              {
+                field: 'grade',
+                title: '年级',
+                unresize: true,
+                align: 'center',
+                width: 100
+              },
+              {
+                field: 'major_name',
+                title: '专业名称',
+                unresize: true,
+                align: 'center',
+                width: 250
+              },
+              {
+                field: 'study_time',
+                title: '学时',
+                unresize: true,
+                align: 'center',
+                width: 50
+              }
+            ]
+          ]
+
+          table.render({
+            elem: '#student-table',
+            url: MODULE_PATH + 'single_student?banji=' + obj.data.banji + '&course=' + obj.data.course_name,
+            page: true,
+            cols: colsStu,
+            skin: 'line',
+          })
+
         }
       })
     });

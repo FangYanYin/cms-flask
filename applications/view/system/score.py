@@ -74,7 +74,6 @@ def banji_chart():
     filters = []
     if banji:
         filters.append(Score.banji.contains(banji))
-    print(filters)
     categoryData = []
     seriesData = []
     courseNames = Score.query.distinct().with_entities(Score.course_name).filter(*filters).logic_all()
@@ -135,24 +134,80 @@ def single():
 def single_data():
     page = request.args.get('page', type=int)
     limit = request.args.get('limit', type=int)
-    school_year = str_escape(request.args.get('year', type=str))
-    semester = str_escape(request.args.get('semester', type=str))
-    course_name = str_escape(request.args.get('course', type=str))
-    teacher_name = str_escape(request.args.get('teacher', type=str))
+    banji = str_escape(request.args.get('banji', type=str))
+    course = str_escape(request.args.get('course', type=str))
     filters = []
-    if school_year:
-        filters.append(Score.school_year.contains(school_year))
-    if semester:
-        filters.append(Score.semester.contains(semester))
-    if course_name:
-        filters.append(Score.course_name.contains(course_name))
-    if teacher_name:
-        filters.append(Score.teacher_name.contains(teacher_name))
-    # orm查询
-    # 使用分页获取data需要.items
-    score = Score.query.filter(*filters).order_by(desc(Score.id)).paginate(page=page, per_page=limit, error_out=False)
+    if banji:
+        filters.append(Score.banji.contains(banji))
+    if course:
+        filters.append(Score.course_name.contains(course))
+    
+    score = Score.query.distinct().with_entities(Score.banji, Score.course_name, Score.major_name, Score.grade).filter(*filters).paginate(page=page, per_page=limit, error_out=False)
     count = score.total
     return table_api(data= model_to_dicts(schema=ScoreOutSchema, data=score.items), count=count)
+
+#  单科图表数据
+@bp.get('/single_chart')
+@authorize("system:score:single")
+def single_chart():
+    banji = str_escape(request.args.get('banji', type=str))
+    course = str_escape(request.args.get('course', type=str))
+    filters = []
+    if banji:
+        filters.append(Score.banji.contains(banji))
+    if course:
+        filters.append(Score.course_name.contains(course))
+    data = Score.query.filter(*filters).logic_all()
+    count = Score.query.filter(*filters).count()
+    a = b = c = d = e = 0;
+    for item in data:
+        if int(item.score) > 89:
+            a += 1
+        elif int(item.score) > 79:
+            b += 1
+        elif int(item.score) > 69:
+            c += 1
+        elif int(item.score) > 59:
+            d += 1
+        else:
+            e += 1
+
+    res = {
+        'msg': '',
+        'count': count,
+        'code': 0,
+        'data':  {
+            'category': ['⚠️(<60)', '合格(60~69)', '一般(70~79)', '掌握(80~89)', '优秀(90~100)'],
+              'series': [e, d, c, b, a],
+              'categories': a+b+c+d+e,
+              'pie' : [
+                  { 'value': round(a / (a+b+c+d+e), 2), 'name': '优秀(90~100)' },
+                  { 'value': round(b / (a+b+c+d+e), 2), 'name': '掌握(80~89)' },
+                  { 'value': round(c / (a+b+c+d+e), 2), 'name': '一般(70~79)' },
+                  { 'value': round(d / (a+b+c+d+e), 2), 'name': '合格(60~69)' },
+                  { 'value': round(e / (a+b+c+d+e), 2), 'name': '⚠️(<60)' }
+                ]
+              },
+    }
+    return jsonify(res)
+
+#  单科学生数据
+@bp.get('/single_student')
+@authorize("system:score:single")
+def single_student():
+    page = request.args.get('page', type=int)
+    limit = request.args.get('limit', type=int)
+    banji = str_escape(request.args.get('banji', type=str))
+    course = str_escape(request.args.get('course', type=str))
+    filters = []
+    if banji:
+        filters.append(Score.banji.contains(banji))
+    if course:
+        filters.append(Score.course_name.contains(course))
+    data = Score.query.filter(*filters).paginate(page=page, per_page=limit, error_out=False)
+    count = data.total
+
+    return table_api(data= model_to_dicts(schema=ScoreOutSchema, data=data.items), count=count)
 
 #   上传
 @bp.get('/upload')
