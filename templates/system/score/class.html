@@ -53,11 +53,10 @@
 </body>
 {% include 'system/common/footer.html' %}
 <script>
-  layui.use(['table', 'form', 'jquery', 'popup', 'echarts'], function () {
+  layui.use(['table', 'form', 'jquery', 'echarts'], function () {
     let table = layui.table
     let form = layui.form
     let $ = layui.jquery
-    let popup = layui.popup
 
     let MODULE_PATH = '/system/score/'
 
@@ -143,9 +142,6 @@
             ]
           };
           pie.setOption(optionPie);
-          window.onresize = function () {
-            pie.resize();
-          }
 
           optionColumn1 = {
             backgroundColor: '#ffffff',
@@ -200,6 +196,7 @@
           };
           column1.setOption(optionColumn1);
           window.onresize = function () {
+            pie.resize();
             column1.resize();
           }
         }

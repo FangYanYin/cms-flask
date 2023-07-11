@@ -217,6 +217,81 @@ def single_student():
 
     return table_api(data= model_to_dicts(schema=ScoreOutSchema, data=data.items), count=count)
 
+#  课程分析
+@bp.get('/course')
+@authorize("system:score:course")
+def course():
+    return render_template('system/score/course.html')
+
+#  课程数据
+@bp.get('/course_data')
+@authorize("system:score:course")
+def course_data():
+    page = request.args.get('page', type=int)
+    limit = request.args.get('limit', type=int)
+    course = str_escape(request.args.get('course', type=str))
+    filters = []
+    if course:
+        filters.append(Score.course_name.contains(course))
+    
+    score = Score.query.distinct().with_entities(Score.course_name, Score.course_nature, Score.credit, Score.study_time).filter(*filters).paginate(page=page, per_page=limit, error_out=False)
+    count = score.total
+    return table_api(data= model_to_dicts(schema=ScoreOutSchema, data=score.items), count=count)
+
+#  课程图表数据
+@bp.get('/course_chart')
+@authorize("system:score:course")
+def course_chart():
+    course = str_escape(request.args.get('course', type=str))
+    filters = []
+    if course:
+        filters.append(Score.course_name.contains(course))
+    banjiData = Score.query.distinct().with_entities(Score.banji).filter(*filters).logic_all()
+    count = Score.query.distinct().with_entities(Score.banji).filter(*filters).count()
+    avgData = []
+    passRatioData = []
+    banji = []
+    for item in banjiData:
+        filters.append(Score.banji.contains(item.banji))
+        banji.append(item.banji)
+        # 平均成绩
+        scores = Score.query.with_entities(Score.score).filter(*filters).logic_all()
+        sumScore = 0;
+        index = 0;
+        for score in scores:
+            sumScore += int(score.score)
+            index +=1
+        avgData.append(round(sumScore / index, 2))
+        # 通过率
+        passRate = 1 - (Score.query.filter(*filters).filter(Score.score < 59).count() / Score.query.filter(*filters).count())
+        passRatioData.append(round(passRate*100, 2))
+        filters.pop()
+    # 排序
+    packed = zip(banji,avgData,passRatioData)
+    sortedBanji, sortedAvgData, sortedPassRatioData = zip(*sorted(packed, key=lambda x: x[1]))
+
+    packed2 = zip(banji,avgData,passRatioData)
+    sortedBanji2, sortedAvgData2, sortedPassRatioData2 = zip(*sorted(packed2, key=lambda x: x[2]))
+
+    res = {
+        'msg': '',
+        'count': count,
+        'code': 0,
+        'data':  {
+            'avg_order': {
+                'banji': sortedBanji,
+                'avg': sortedAvgData,
+                'pass_ratio': sortedPassRatioData,
+            },
+            'pass_order': {
+                'banji': sortedBanji2,
+                'avg': sortedAvgData2,
+                'pass_ratio': sortedPassRatioData2,
+            }
+        },
+    }
+    return jsonify(res)
+
 #   上传
 @bp.get('/upload')
 @authorize("system:score:add", log=True)
